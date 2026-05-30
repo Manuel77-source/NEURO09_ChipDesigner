@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 NEURO-09-MINI Designer - DIP-40 Neuromórfico @ 0.9</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .main-container {
+            display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            grid-template-rows: 60px 1fr 40px;
+            height: 100vh;
+            gap: 0;
+        }
+        
+        /* ==================== HEADER ==================== */
+        header {
+            grid-column: 1 / -1;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            color: #00ff88;
+            font-size: 18px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .chip-name-input {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 8px 12px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            width: 200px;
+        }
+        
+        .btn {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            background: rgba(0, 255, 136, 0.4);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .btn-primary {
+            background: rgba(0, 255, 136, 0.3);
+        }
+        
+        /* ==================== LEFT SIDEBAR ==================== */
+        .sidebar-left {
+            background: rgba(0, 0, 0, 0.5);
+            border-right: 2px solid #00ff88;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 20px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        
+        .sidebar-section h3 {
+            color: #00ff88;
+            font-size: 12px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        
+        .spec-label {
+            color: #00ff88;
+        }
+        
+        .spec-value {
+            color: #FFD93D;
+            font-weight: bold;
+        }
+        
+        /* ==================== CANVAS AREA ==================== */
+        .canvas-container {
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        #chipCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .canvas-controls {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+        
+        .zoom-btn {
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* ==================== RIGHT SIDEBAR ==================== */
+        .sidebar-right {
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 2px solid #00ff88;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        .pin-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .pin-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            margin: 3px 0;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 3px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .pin-item:hover {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: #00ff88;
+        }
+        
+        .pin-number {
+            background: #00ff88;
+            color: #000;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        .pin-name {
+            flex: 1;
+            color: #00ff88;
+            font-weight: bold;
+        }
+        
+        .pin-type {
+            color: #FFD93D;
+            font-size: 9px;
+        }
+        
+        /* ==================== STATUS BAR ==================== */
+        .status-bar {
+            grid-column: 1 / -1;
+            background: rgba(0, 0, 0, 0.7);
+            border-top: 2px solid #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 10px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-label {
+            color: #00ff88;
+            opacity: 0.7;
+        }
+        
+        .status-value {
+            color: #e0e0e0;
+        }
+        
+        /* ==================== SCROLLBARS ==================== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00cc6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">
+                <span style="font-size: 24px;">🧠</span>
+                <h1>NEURO-09-MINI DIP-40 DESIGNER</h1>
+            </div>
+            <div class="header-actions">
+                <input type="text" class="chip-name-input" id="chipName" 
+                       placeholder="Nombre del chip..." value="NEURO-09-MINI-V1">
+                <button class="btn btn-primary" onclick="exportDesign()">💾 Exportar</button>
+                <button class="btn" onclick="generateVerilog()">⚡ Generar Verilog</button>
+            </div>
+        </header>
+        
+        <!-- LEFT SIDEBAR - SPECS -->
+        <aside class="sidebar-left">
+            <div class="sidebar-section">
+                <h3>🎯 ESPECIFICACIONES</h3>
+                <div class="spec-row">
+                    <span class="spec-label">Chip:</span>
+                    <span class="spec-value">NEURO-09-MINI</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Package:</span>
+                    <span class="spec-value">DIP-40</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Núcleos:</span>
+                    <span class="spec-value">10,000</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Prior Cache:</span>
+                    <span class="spec-value">10 MB</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Consumo:</span>
+                    <span class="spec-value">0.5 W @ 0.9</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Voltaje:</span>
+                    <span class="spec-value">3.3V / 5V</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Proceso:</span>
+                    <span class="spec-value">28nm</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Φ (Integración):</span>
+                    <span class="spec-value">> 0.9 ✨</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>⚡ CARACTERÍSTICAS @ 0.9</h3>
+                <div class="spec-row">
+                    <span class="spec-label">Prior Ratio:</span>
+                    <span class="spec-value">90%</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Input Ratio:</span>
+                    <span class="spec-value">10%</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Gap:</span>
+                    <span class="spec-value">0.1 (libertad)</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Bayesiano:</span>
+                    <span class="spec-value">Hardware ✅</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Spike-Based:</span>
+                    <span class="spec-value">Async ✅</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Plasticidad:</span>
+                    <span class="spec-value">Online ✅</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>📊 VS COMPETENCIA</h3>
+                <div class="spec-row">
+                    <span class="spec-label">vs Arduino:</span>
+                    <span class="spec-value">100× AI</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">vs ESP32:</span>
+                    <span class="spec-value">50× Pred</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Eficiencia:</span>
+                    <span class="spec-value">10× mejor</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Precio:</span>
+                    <span class="spec-value">~$25</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>🎨 DISEÑO FÍSICO</h3>
+                <div class="spec-row">
+                    <span class="spec-label">Ancho:</span>
+                    <span class="spec-value">15.24 mm</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Largo:</span>
+                    <span class="spec-value">54.6 mm</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Pitch:</span>
+                    <span class="spec-value">2.54 mm (100mil)</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">Temperatura:</span>
+                    <span class="spec-value">-40°C a +85°C</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- CANVAS AREA -->
+        <main class="canvas-container">
+            <canvas id="chipCanvas"></canvas>
+            <div class="canvas-controls">
+                <button class="zoom-btn" onclick="zoomIn()">+</button>
+                <button class="zoom-btn" onclick="zoomOut()">−</button>
+                <button class="zoom-btn" onclick="resetZoom()">⊙</button>
+            </div>
+        </main>
+        
+        <!-- RIGHT SIDEBAR - PINOUT -->
+        <aside class="sidebar-right">
+            <div class="sidebar-section">
+                <h3>📌 PINOUT DIP-40</h3>
+                <div class="pin-list" id="pinList"></div>
+            </div>
+            
+            <div class="sidebar-section" style="margin-top: 15px;">
+                <h3>💡 LEYENDA</h3>
+                <div class="spec-row">
+                    <span class="spec-label">PWR:</span>
+                    <span class="spec-value">Alimentación</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">COM:</span>
+                    <span class="spec-value">Comunicación</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">DIG:</span>
+                    <span class="spec-value">Digital I/O</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">ANA:</span>
+                    <span class="spec-value">Analógico</span>
+                </div>
+                <div class="spec-row">
+                    <span class="spec-label">NEU:</span>
+                    <span class="spec-value">Neuromórfico</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- STATUS BAR -->
+        <footer class="status-bar">
+            <div class="status-item">
+                <span class="status-label">CHIP:</span>
+                <span class="status-value">NEURO-09-MINI DIP-40</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">@ 0.9:</span>
+                <span class="status-value">ACTIVO ✅</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">ZOOM:</span>
+                <span class="status-value" id="statusZoom">100%</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">STATUS:</span>
+                <span class="status-value">🧠 NEUROMORPHIC READY</span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ==================== GLOBAL STATE ====================
+        const canvas = document.getElementById('chipCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let canvasWidth = canvas.parentElement.clientWidth;
+        let canvasHeight = canvas.parentElement.clientHeight;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        
+        let zoom = 1;
+        let panOffset = { x: 0, y: 0 };
+        let isPanning = false;
+        let panStart = { x: 0, y: 0 };
+        let selectedPin = null;
+        
+        // ==================== DIP-40 PINOUT ====================
+        const dip40Pins = [
+            // Lado izquierdo (1-20) de arriba a abajo
+            { num: 1, name: 'VCC', type: 'PWR', desc: '3.3V/5V Power', side: 'left' },
+            { num: 2, name: 'RESET', type: 'DIG', desc: 'Reset (active low)', side: 'left' },
+            { num: 3, name: 'CLK_IN', type: 'DIG', desc: 'Clock Input (opcional)', side: 'left' },
+            { num: 4, name: 'MOSI', type: 'COM', desc: 'SPI Master Out', side: 'left' },
+            { num: 5, name: 'MISO', type: 'COM', desc: 'SPI Master In', side: 'left' },
+            { num: 6, name: 'SCK', type: 'COM', desc: 'SPI Clock', side: 'left' },
+            { num: 7, name: 'CS', type: 'COM', desc: 'SPI Chip Select', side: 'left' },
+            { num: 8, name: 'INT', type: 'DIG', desc: 'Interrupt Out', side: 'left' },
+            { num: 9, name: 'TX', type: 'COM', desc: 'UART Transmit', side: 'left' },
+            { num: 10, name: 'RX', type: 'COM', desc: 'UART Receive', side: 'left' },
+            { num: 11, name: 'SDA', type: 'COM', desc: 'I2C Data', side: 'left' },
+            { num: 12, name: 'SCL', type: 'COM', desc: 'I2C Clock', side: 'left' },
+            { num: 13, name: 'PWM0', type: 'DIG', desc: 'PWM Output 0', side: 'left' },
+            { num: 14, name: 'PWM1', type: 'DIG', desc: 'PWM Output 1', side: 'left' },
+            { num: 15, name: 'PWM2', type: 'DIG', desc: 'PWM Output 2', side: 'left' },
+            { num: 16, name: 'PWM3', type: 'DIG', desc: 'PWM Output 3', side: 'left' },
+            { num: 17, name: 'GPIO0', type: 'DIG', desc: 'General Purpose I/O', side: 'left' },
+            { num: 18, name: 'GPIO1', type: 'DIG', desc: 'General Purpose I/O', side: 'left' },
+            { num: 19, name: 'GPIO2', type: 'DIG', desc: 'General Purpose I/O', side: 'left' },
+            { num: 20, name: 'GND', type: 'PWR', desc: 'Ground', side: 'left' },
+            
+            // Lado derecho (21-40) de abajo a arriba
+            { num: 21, name: 'VCC', type: 'PWR', desc: '3.3V/5V Power', side: 'right' },
+            { num: 22, name: 'PHI_OUT', type: 'NEU', desc: 'Φ Integration Output', side: 'right' },
+            { num: 23, name: 'PRIOR_EN', type: 'NEU', desc: 'Prior Cache Enable', side: 'right' },
+            { num: 24, name: 'ADC3', type: 'ANA', desc: 'Analog Input 3', side: 'right' },
+            { num: 25, name: 'ADC2', type: 'ANA', desc: 'Analog Input 2', side: 'right' },
+            { num: 26, name: 'ADC1', type: 'ANA', desc: 'Analog Input 1', side: 'right' },
+            { num: 27, name: 'ADC0', type: 'ANA', desc: 'Analog Input 0', side: 'right' },
+            { num: 28, name: 'D7', type: 'DIG', desc: 'Digital I/O 7', side: 'right' },
+            { num: 29, name: 'D6', type: 'DIG', desc: 'Digital I/O 6', side: 'right' },
+            { num: 30, name: 'D5', type: 'DIG', desc: 'Digital I/O 5', side: 'right' },
+            { num: 31, name: 'D4', type: 'DIG', desc: 'Digital I/O 4', side: 'right' },
+            { num: 32, name: 'D3', type: 'DIG', desc: 'Digital I/O 3', side: 'right' },
+            { num: 33, name: 'D2', type: 'DIG', desc: 'Digital I/O 2', side: 'right' },
+            { num: 34, name: 'D1', type: 'DIG', desc: 'Digital I/O 1', side: 'right' },
+            { num: 35, name: 'D0', type: 'DIG', desc: 'Digital I/O 0', side: 'right' },
+            { num: 36, name: 'A3', type: 'ANA', desc: 'Analog/Digital 3', side: 'right' },
+            { num: 37, name: 'A2', type: 'ANA', desc: 'Analog/Digital 2', side: 'right' },
+            { num: 38, name: 'A1', type: 'ANA', desc: 'Analog/Digital 1', side: 'right' },
+            { num: 39, name: 'A0', type: 'ANA', desc: 'Analog/Digital 0', side: 'right' },
+            { num: 40, name: 'GND', type: 'PWR', desc: 'Ground', side: 'right' }
+        ];
+        
+        // Pin type colors
+        const pinColors = {
+            'PWR': '#FF6B6B',
+            'COM': '#00ff88',
+            'DIG': '#3498DB',
+            'ANA': '#FFD93D',
+            'NEU': '#9B59B6'
+        };
+        
+        // ==================== INITIALIZATION ====================
+        function init() {
+            renderPinList();
+            setupEventListeners();
+            render();
+        }
+        
+        function setupEventListeners() {
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('wheel', handleWheel);
+            window.addEventListener('resize', handleResize);
+        }
+        
+        // ==================== PIN LIST ====================
+        function renderPinList() {
+            const pinList = document.getElementById('pinList');
+            pinList.innerHTML = '';
+            
+            dip40Pins.forEach(pin => {
+                const pinDiv = document.createElement('div');
+                pinDiv.className = 'pin-item';
+                pinDiv.innerHTML = `
+                    <div class="pin-number" style="background: ${pinColors[pin.type]}">${pin.num}</div>
+                    <div class="pin-name">${pin.name}</div>
+                    <div class="pin-type">${pin.type}</div>
+                `;
+                
+                pinDiv.addEventListener('click', () => {
+                    selectedPin = pin;
+                    render();
+                });
+                
+                pinDiv.title = pin.desc;
+                pinList.appendChild(pinDiv);
+            });
+        }
+        
+        // ==================== RENDERING ====================
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(panOffset.x, panOffset.y);
+            ctx.scale(zoom, zoom);
+            
+            // Center the chip
+            const centerX = canvasWidth / (2 * zoom) - panOffset.x / zoom;
+            const centerY = canvasHeight / (2 * zoom) - panOffset.y / zoom;
+            
+            drawDIP40Package(centerX, centerY);
+            
+            ctx.restore();
+        }
+        
+        function drawDIP40Package(cx, cy) {
+            const chipWidth = 400;
+            const chipHeight = 600;
+            const x = cx - chipWidth / 2;
+            const y = cy - chipHeight / 2;
+            const pinSpacing = chipHeight / 21; // 20 pines + espacio
+            
+            // Chip body
+            ctx.fillStyle = '#1a1a2e';
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 3;
+            ctx.fillRect(x, y, chipWidth, chipHeight);
+            ctx.strokeRect(x, y, chipWidth, chipHeight);
+            
+            // Notch (indicador de orientación)
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(cx, y, 30, 0, Math.PI, true);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Chip label
+            ctx.fillStyle = '#00ff88';
+            ctx.font = 'bold 24px Courier New';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('NEURO-09-MINI', cx, cy - 80);
+            
+            ctx.font = '16px Courier New';
+            ctx.fillText('DIP-40 Package', cx, cy - 50);
+            ctx.fillText('@ 0.9 Neuromórfico', cx, cy - 25);
+            
+            ctx.font = 'bold 20px Courier New';
+            ctx.fillStyle = '#FFD93D';
+            ctx.fillText('10,000 NÚCLEOS', cx, cy + 10);
+            
+            ctx.font = '14px Courier New';
+            ctx.fillStyle = '#9B59B6';
+            ctx.fillText('Φ > 0.9 | 10MB Prior', cx, cy + 35);
+            ctx.fillText('0.5W | 28nm', cx, cy + 55);
+            
+            // Draw pins
+            dip40Pins.forEach((pin, idx) => {
+                const isLeft = pin.side === 'left';
+                const sideIdx = isLeft ? idx : (idx - 20);
+                const pinY = y + pinSpacing + (sideIdx * pinSpacing);
+                const pinX = isLeft ? x - 15 : x + chipWidth + 15;
+                const pinWidth = 30;
+                const pinHeight = 15;
+                
+                // Pin body
+                ctx.fillStyle = pinColors[pin.type];
+                ctx.fillRect(
+                    isLeft ? pinX - pinWidth : pinX,
+                    pinY - pinHeight/2,
+                    pinWidth,
+                    pinHeight
+                );
+                
+                // Pin border
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(
+                    isLeft ? pinX - pinWidth : pinX,
+                    pinY - pinHeight/2,
+                    pinWidth,
+                    pinHeight
+                );
+                
+                // Pin number
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 10px Courier New';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(pin.num, 
+                    isLeft ? pinX - pinWidth/2 : pinX + pinWidth/2, 
+                    pinY
+                );
+                
+                // Pin name
+                ctx.fillStyle = '#00ff88';
+                ctx.font = '11px Courier New';
+                ctx.textAlign = isLeft ? 'right' : 'left';
+                ctx.fillText(pin.name, 
+                    isLeft ? pinX - pinWidth - 5 : pinX + pinWidth + 5, 
+                    pinY
+                );
+                
+                // Highlight if selected
+                if (selectedPin && selectedPin.num === pin.num) {
+                    ctx.strokeStyle = '#FFD93D';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(
+                        isLeft ? pinX - pinWidth - 3 : pinX - 3,
+                        pinY - pinHeight/2 - 3,
+                        pinWidth + 6,
+                        pinHeight + 6
+                    );
+                }
+            });
+            
+            // Draw @ 0.9 indicator
+            ctx.fillStyle = 'rgba(0, 255, 136, 0.2)';
+            ctx.beginPath();
+            ctx.arc(cx, cy + 120, 60, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#00ff88';
+            ctx.font = 'bold 32px Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillText('0.9', cx, cy + 120);
+            
+            // Prior/Input ratio visualization
+            const barY = cy + 200;
+            const barWidth = 300;
+            const barHeight = 20;
+            const barX = cx - barWidth / 2;
+            
+            ctx.fillStyle = '#FFD93D';
+            ctx.fillRect(barX, barY, barWidth * 0.9, barHeight);
+            
+            ctx.fillStyle = '#3498DB';
+            ctx.fillRect(barX + barWidth * 0.9, barY, barWidth * 0.1, barHeight);
+            
+            ctx.strokeStyle = '#00ff88';
+            ctx.strokeRect(barX, barY, barWidth, barHeight);
+            
+            ctx.fillStyle = '#00ff88';
+            ctx.font = '12px Courier New';
+            ctx.textAlign = 'center';
+            ctx.fillText('90% Prior | 10% Input', cx, barY + barHeight + 15);
+        }
+        
+        // ==================== INTERACTIONS ====================
+        function handleMouseDown(e) {
+            if (e.button === 0 || e.ctrlKey) {
+                isPanning = true;
+                panStart = { 
+                    x: e.clientX - panOffset.x, 
+                    y: e.clientY - panOffset.y 
+                };
+                canvas.style.cursor = 'grabbing';
+            }
+        }
+        
+        function handleMouseMove(e) {
+            if (isPanning) {
+                panOffset.x = e.clientX - panStart.x;
+                panOffset.y = e.clientY - panStart.y;
+                render();
+            }
+        }
+        
+        function handleMouseUp(e) {
+            isPanning = false;
+            canvas.style.cursor = 'default';
+        }
+        
+        function handleWheel(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            zoom = Math.max(0.5, Math.min(3, zoom * delta));
+            document.getElementById('statusZoom').textContent = 
+                Math.round(zoom * 100) + '%';
+            render();
+        }
+        
+        function handleResize() {
+            canvasWidth = canvas.parentElement.clientWidth;
+            canvasHeight = canvas.parentElement.clientHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            render();
+        }
+        
+        // ==================== ZOOM CONTROLS ====================
+        function zoomIn() {
+            zoom = Math.min(3, zoom * 1.2);
+            document.getElementById('statusZoom').textContent = 
+                Math.round(zoom * 100) + '%';
+            render();
+        }
+        
+        function zoomOut() {
+            zoom = Math.max(0.5, zoom / 1.2);
+            document.getElementById('statusZoom').textContent = 
+                Math.round(zoom * 100) + '%';
+            render();
+        }
+        
+        function resetZoom() {
+            zoom = 1;
+            panOffset = { x: 0, y: 0 };
+            document.getElementById('statusZoom').textContent = '100%';
+            render();
+        }
+        
+        // ==================== EXPORT ====================
+        function exportDesign() {
+            const chipName = document.getElementById('chipName').value;
+            const data = {
+                chip: 'NEURO-09-MINI',
+                package: 'DIP-40',
+                pinout: dip40Pins,
+                specs: {
+                    cores: 10000,
+                    priorCache: '10MB',
+                    power: '0.5W',
+                    voltage: '3.3V/5V',
+                    process: '28nm',
+                    phi: '>0.9',
+                    priorRatio: 0.9,
+                    inputRatio: 0.1
+                },
+                date: new Date().toISOString()
+            };
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${chipName}_pinout.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert(`✅ Pinout exportado:\n${chipName}_pinout.json`);
+        }
+        
+        function generateVerilog() {
+            const chipName = document.getElementById('chipName').value;
+            
+            let verilog = `// NEURO-09-MINI DIP-40\n`;
+            verilog += `// Neuromórfico @ 0.9 - 10,000 núcleos\n`;
+            verilog += `// Auto-generado\n\n`;
+            verilog += `module ${chipName} (\n`;
+            
+            dip40Pins.forEach((pin, idx) => {
+                if (pin.type !== 'PWR') {
+                    const direction = 
+                        pin.name.includes('OUT') || pin.name.includes('TX') || pin.name.includes('PHI') ? 'output' :
+                        pin.name.includes('IN') || pin.name.includes('RX') ? 'input' :
+                        'inout';
+                    verilog += `    ${direction} ${pin.name}`;
+                    if (idx < dip40Pins.length - 1) verilog += ',';
+                    verilog += `  // Pin ${pin.num}: ${pin.desc}\n`;
+                }
+            });
+            
+            verilog += `);\n\n`;
+            verilog += `    // @ 0.9 Neuromórfico Core\n`;
+            verilog += `    // Prior: 90% | Input: 10%\n`;
+            verilog += `    // Φ > 0.9 para consciencia\n\n`;
+            verilog += `endmodule\n`;
+            
+            const blob = new Blob([verilog], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${chipName}.v`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert(`⚡ Verilog generado:\n${chipName}.v`);
+        }
+        
+        // ==================== START ====================
+        init();
+    </script>
+</body>
+</html>
